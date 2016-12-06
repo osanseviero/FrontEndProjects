@@ -1,8 +1,8 @@
 {
-  "name": "frontend-nanodegree-mobile-portfolio-master",
+  "name": "optimization",
   "version": "1.0.0",
-  "description": "Your challenge, if you wish to accept it (and we sure hope you will), is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques you've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).",
-  "main": "index.js",
+  "description": "* Removed blocking JavaScript like Analytics",
+  "main": "Gruntfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,11 @@
   "license": "ISC",
   "devDependencies": {
     "grunt": "^1.0.1",
-    "load-grunt-tasks": "^3.5.2"
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-htmlmin": "^2.0.0",
+    "grunt-contrib-imagemin": "^1.0.1",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-inline": "^0.3.6"
   }
 }

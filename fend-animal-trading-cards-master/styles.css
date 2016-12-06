@@ -1,0 +1,38 @@
+.card, .information {
+	border: 0.5px solid #B7B7B7;
+}
+
+.card {
+	width: 300px;
+	padding: 0px 10px 10px 10px;
+	box-shadow: 4px 5px 0px 2px rgba(224,224,224,1);
+}
+
+img {
+	width: 300px;
+}
+
+#fact {
+	font-style: italic;
+}
+
+.information {
+	padding: 0px 5px 0px 5px;
+}
+
+.centered {
+	margin: 0px 0px 0px 10px;
+}
+
+ul {
+	padding: 0px;
+}
+
+li {
+	list-style-type: none;
+}
+
+li span {
+	font-weight: bold;
+}
+

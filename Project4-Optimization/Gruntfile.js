@@ -84,6 +84,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-inline');
+  grunt.loadNpmTasks('grunt-responsive-images');
 
   // Default task(s).
   grunt.registerTask('default', ['cssmin', 'uglify', 'htmlmin', 'imagemin', 'inline']);

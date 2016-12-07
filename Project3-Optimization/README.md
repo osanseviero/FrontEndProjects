@@ -48,4 +48,6 @@ Other changes done in the project
  - Not essential JavaScript (like analytics) was moved to the end of the HTML (Google Analytics):
  - Fonts were loaded using Web Font Loader so they didn't block CRP.
  - main.js file was changed so it didn't access layout properties and changed the style continuously. 
- - Reduced the number of pizza elements created.
+ - Reduced the number of pizza elements created for body and for background.
+ - Changed querySelectorAll() to getElementsByClassName() to speed up query selectors.
+ - Reduces the number of objects created inside for loops to reduce the work of GC.

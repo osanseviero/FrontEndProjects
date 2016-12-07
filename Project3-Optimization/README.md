@@ -37,6 +37,7 @@ Gruntfile makes the following changes to all the project:
  - Compress all the images with imagemin.
  - Uglifies the JavaScript with uglify.
  - Inlines the CSS with inline.
+ - Change the size of heavy images using responsive_images.
  
 The CSS files to be inlines need to have the argument `__inline=true`. This is done in the important CSS files so they don't block the CRP.
 

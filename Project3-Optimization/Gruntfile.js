@@ -26,6 +26,24 @@ module.exports = function(grunt) {
         }
       }
     },
+    responsive_images: {
+      dev: {
+        options: {
+          engine: 'im',
+          sizes: [{
+            width: 100,
+            suffix: 'small',
+            quality: 50
+          }]
+        },
+        files: [{
+          expand: true,
+          src: ['pizzeria.jpg'],
+          cwd: 'src/views/images',
+          dest: 'src/views/images'
+        }]
+      }
+    },
     imagemin: {
       png: {
         options: {
@@ -87,6 +105,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-responsive-images');
 
   // Default task(s).
-  grunt.registerTask('default', ['cssmin', 'uglify', 'htmlmin', 'imagemin', 'inline']);
+  grunt.registerTask('default', ['cssmin', 'uglify', 'htmlmin', 'responsive_images', 'imagemin', 'inline']);
 
 };

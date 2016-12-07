@@ -46,7 +46,6 @@ module.exports = function(grunt) {
       jpg: {
         options: {
           progressive: true,
-          optimizationLevel: 7
         },
         files: [
           {
@@ -75,7 +74,7 @@ module.exports = function(grunt) {
         src: 'dest/index.html',
         dest: 'dest/index.html'
       }
-    }
+    },
   });
 
   // Load the plugin that provides the "uglify" task.

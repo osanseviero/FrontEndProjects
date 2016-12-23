@@ -11,7 +11,7 @@ function initMap() {
   var bounds = new google.maps.LatLngBounds();
 
   var locations = [
-    {title: 'Ceentral', location: {lat: 19.412080, lng: -99.180513}},
+    {title: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
     {title: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
     {title: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
     {title: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
@@ -41,28 +41,38 @@ function initMap() {
 
 function populateInfoWindow(marker, infoWindow) {
   if(infoWindow.marker != marker) {
-      var formattedFSLink = getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
-        infoWindow.marker = marker;
+      infoWindow.marker = marker;
+      var recData = false;
+
+      getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
         var content = '<h1>' + '<h1>' + marker.title + '</h1>';
-        console.log(data);
-        if(data === undefined) {
-          content += '<div>No data available for this location</div>';
-        }
+
         if(data.twitter) {
           content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
         }
-        if(data.phone) {
-          content += '<div>' + data.phone + '"</div>';
-
+        if(data.count) {
+          content += "<p>Visit Count " + data.count + "</p>";
         }
-       
-        content += "<h2>Count " + data.count + "</h2>";
+        if(data.phone) {
+          content += '<div>Phone: ' + data.phone + '"</div>';
+        }
+        
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
-        infoWindow.addListener('cloclick', function() {
-            infoWindow.setMarker(null);
-        });
+        recData = true;
       });
+
+      infoWindow.open(map, marker);
+      infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
+
+      setTimeout(function() {
+        if(!recData) {
+          var content = '<h1>' + '<h1>' + marker.title + '</h1>';
+          content += '<div>No data available for this location</div>';
+          infoWindow.setContent(content);
+          infoWindow.open(map, marker);
+        }
+      }, 1000)
   }
 };
 
@@ -77,6 +87,7 @@ function getFoursquareInfo(title, lat, lng, callback) {
   $.getJSON(formattedFSLink).then(function(data){
     for(var i = 0; i < data.response.venues.length; i++) {
       if(data.response.venues[i].name == title) {
+        console.log(data.response.venues[i]);
         callback({
           count: data.response.venues[i].stats.checkinsCount,
           phone: data.response.venues[i].contact.phone,
@@ -85,7 +96,6 @@ function getFoursquareInfo(title, lat, lng, callback) {
         i = data.response.venues.length;
       }
     }
-    callback(undefined);
   });
 };
 

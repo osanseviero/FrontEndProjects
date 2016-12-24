@@ -2,8 +2,7 @@ var map;
 var lastMarker = null;
 
 function initMap() {
-  // Constructor creates a new map - only center and zoom are required.
-
+  // Create a new map
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 19.425286, lng: -99.189031},
     zoom: 14
@@ -23,6 +22,7 @@ function initMap() {
     {title: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
   ];
 
+  // Create every marker and add event listeners
   for(var i = 0; i < locations.length; i++) {
       var position = locations[i].location;
       var title = locations[i].title;
@@ -34,10 +34,15 @@ function initMap() {
           id: i
       })
       markers.push(marker);
-
       bounds.extend(marker.position);
+
       marker.addListener('click', function() {
         populateInfoWindow(this, largeInfoWindow);
+      });
+
+      // Stop animation if infoWindow is closed
+      google.maps.event.addListener(largeInfoWindow,'closeclick',function(){
+        lastMarker.setAnimation(null);
       });
   }
 }

@@ -1,6 +1,9 @@
 var map;
+var lastMarker = null;
+
 function initMap() {
   // Constructor creates a new map - only center and zoom are required.
+
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 19.425286, lng: -99.189031},
     zoom: 14
@@ -34,45 +37,54 @@ function initMap() {
 
       bounds.extend(marker.position);
       marker.addListener('click', function() {
-          populateInfoWindow(this, largeInfoWindow)
+        populateInfoWindow(this, largeInfoWindow);
       });
   }
 }
 
+/* Fill the information window with information from FourSquare API*/
 function populateInfoWindow(marker, infoWindow) {
   if(infoWindow.marker != marker) {
-      infoWindow.marker = marker;
-      var recData = false;
+    marker.setAnimation(google.maps.Animation.BOUNCE)
+    infoWindow.marker = marker;
+    var recData = false;
 
-      getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
+    // Stop the animation of the previous marker
+    if(lastMarker !== null) lastMarker.setAnimation(null);
+    lastMarker = marker;
+
+    // Get the information and calls the callback.
+    getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
+      var content = '<h1>' + '<h1>' + marker.title + '</h1>';
+
+      if(data.twitter) {
+        content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
+      }
+      if(data.count) {
+        content += "<p>Visit Count " + data.count + "</p>";
+      }
+      if(data.phone) {
+        content += '<div>Phone: ' + data.phone + '"</div>';
+      }
+      
+      infoWindow.setContent(content);
+      infoWindow.open(map, marker);
+      recData = true;
+    });
+
+    // Handle when the website waits for the information
+    infoWindow.open(map, marker);
+    infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
+
+    // Handle when there is no information
+    setTimeout(function() {
+      if(!recData) {
         var content = '<h1>' + '<h1>' + marker.title + '</h1>';
-
-        if(data.twitter) {
-          content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
-        }
-        if(data.count) {
-          content += "<p>Visit Count " + data.count + "</p>";
-        }
-        if(data.phone) {
-          content += '<div>Phone: ' + data.phone + '"</div>';
-        }
-        
+        content += '<div>No data available for this location</div>';
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
-        recData = true;
-      });
-
-      infoWindow.open(map, marker);
-      infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
-
-      setTimeout(function() {
-        if(!recData) {
-          var content = '<h1>' + '<h1>' + marker.title + '</h1>';
-          content += '<div>No data available for this location</div>';
-          infoWindow.setContent(content);
-          infoWindow.open(map, marker);
-        }
-      }, 1000)
+      }
+    }, 1000)
   }
 };
 
@@ -84,6 +96,7 @@ function getFoursquareInfo(title, lat, lng, callback) {
   var formattedFSLink = foursquareLink.replace('%lat%', lat);
   formattedFSLink = formattedFSLink.replace('%lon%', lng);
 
+  // JSON request to FourSquare API
   $.getJSON(formattedFSLink).then(function(data){
     for(var i = 0; i < data.response.venues.length; i++) {
       if(data.response.venues[i].name == title) {

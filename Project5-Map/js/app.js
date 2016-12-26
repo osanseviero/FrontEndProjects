@@ -61,17 +61,25 @@ function populateInfoWindow(marker, infoWindow) {
     // Get the information and calls the callback.
     getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
       var content = '<h1>' + '<h1>' + marker.title + '</h1>';
-
-      if(data.twitter) {
-        content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
-      }
-      if(data.count) {
-        content += "<p>Visit Count " + data.count + "</p>";
-      }
-      if(data.phone) {
-        content += '<div>Phone: ' + data.phone + '"</div>';
-      }
       
+      // Handle JSON request error
+      if(data === 400) {
+        content += "<p>There was an error retrieving information from FourSquare API</p>";
+      }
+
+      // Fill the information window with the information that exists for specific record
+      else {
+        if(data.twitter) {
+          content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
+        }
+        if(data.count) {
+          content += "<p>Visit Count " + data.count + "</p>";
+        }
+        if(data.phone) {
+          content += '<p>Phone: ' + data.phone + '</p>';
+        }
+      }
+
       infoWindow.setContent(content);
       infoWindow.open(map, marker);
       recData = true;
@@ -114,6 +122,8 @@ function getFoursquareInfo(title, lat, lng, callback) {
         i = data.response.venues.length;
       }
     }
+  }).fail(function() {
+    callback(400);
   });
 };
 

@@ -1,13 +1,24 @@
 var map;
 var lastMarker = null;
 
+function Location(title, lat, lng) {
+  var self = this;
+  self.name = title,
+  self.location = {lat, lng};
+}
+
 var ViewModel = function() {
-    this.firstName = ko.observable("Bert");
-    this.lastName = ko.observable("Bertington");
-    
-    this.fullName = ko.computed(function() {
-        return this.firstName() + " " + this.lastName();
-    }, this);
+  var self = this;
+
+  self.locations = ko.observableArray([
+      new Location('Centraal', 19.412080, -99.180513),
+      new Location("Google Mexico", 19.425414, -99.162448),
+      new Location("500 Startups", 19.425414, -99.162448),
+      new Location("Nearsoft DF", 19.412991, -99.164425),
+      new Location("WeWork Varsovia", 19.424371, -99.167971),
+      new Location("Facebook", 19.426087, -99.203319),
+      new Location("WeWork Varsovia", 19.423134, -99.1763432)
+  ]);
 };
 
 ko.applyBindings(new ViewModel());

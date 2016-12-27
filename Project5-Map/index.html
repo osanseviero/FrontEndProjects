@@ -18,12 +18,14 @@
   <body>
     <div id="map"></div>
     <div id="select">
-      <p>First name: <strong data-bind="text: firstName"></strong></p>
-      <p>Last name: <strong data-bind="text: lastName"></strong></p>
-      <p>Full name: <strong data-bind="text: fullName"></strong></p>
-
-      <p>First name: <input data-bind="value: firstName" /></p>
-      <p>Last name: <input data-bind="value: lastName" /></p>
+      <select data-bind="options: locations, value: name, optionsText: 'name', optionsCaption: 'All locations'">
+        <option disabled selected value> -- select an option -- </option>
+      </select>
+    </div>
+    <div id="list">
+       <ul data-bind="foreach: locations">
+        <li data-bind="text: name"></lu>
+      </ul>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.1.js"></script>

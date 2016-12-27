@@ -1,16 +1,35 @@
 var map;
 var lastMarker = null;
 
+var ViewModel = function() {
+    this.firstName = ko.observable("Bert");
+    this.lastName = ko.observable("Bertington");
+    
+    this.fullName = ko.computed(function() {
+        return this.firstName() + " " + this.lastName();
+    }, this);
+};
+
+ko.applyBindings(new ViewModel());
+
+
 function initMap() {
   // Create a new map
   map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 19.425286, lng: -99.189031},
-    zoom: 14
+    zoom: 13,
   });
 
   var markers = [];
   var largeInfoWindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
+
+  google.maps.event.addDomListener(window, "resize", function() {
+    console.log("heey");
+   var center = map.getCenter();
+   google.maps.event.trigger(map, "resize");
+   map.setCenter(center); 
+  });
 
   var locations = [
     {title: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},

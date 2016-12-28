@@ -19,6 +19,8 @@ var ViewModel = function() {
       new Location("Facebook", 19.426087, -99.203319),
       new Location("WeWork Varsovia", 19.423134, -99.1763432)
   ]);
+
+  self.curLoc = ko.observable();
 };
 
 ko.applyBindings(new ViewModel());
@@ -36,7 +38,6 @@ function initMap() {
   var bounds = new google.maps.LatLngBounds();
 
   google.maps.event.addDomListener(window, "resize", function() {
-    console.log("heey");
    var center = map.getCenter();
    google.maps.event.trigger(map, "resize");
    map.setCenter(center); 

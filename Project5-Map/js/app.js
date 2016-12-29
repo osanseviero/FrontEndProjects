@@ -40,12 +40,12 @@ var ViewModel = function() {
   self.filteredLocations = ko.computed(function() {
     if(self.name() === undefined || self.name() === "") {
       locations = originalLocations;
-      // Try to initiate the map (for first try)
+      // Try to initiate the map (for initiation)
       try {
         initMap();
       }
       catch(err) {
-
+        // Do nothing
       }
       return self.locations();
     }
@@ -166,7 +166,6 @@ function populateInfoWindow(marker, infoWindow) {
     }, 2000);
   }
 };
-
 
 /*Get twitter, phone, and count of a specific location*/
 function getFoursquareInfo(name, lat, lng, callback) {

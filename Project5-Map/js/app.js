@@ -1,9 +1,21 @@
 var map;
 var lastMarker = null;
 
+var originalLocations = [
+  {title: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
+  {title: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
+  {title: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
+  {title: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
+  {title: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}},
+  {title: 'Facebook', location: {lat: 19.426087, lng: -99.203319}},
+  {title: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
+];
+
+var locations = originalLocations;
+
 function Location(title, lat, lng) {
   var self = this;
-  self.name = title,
+  self.title = title,
   self.location = {lat, lng};
 }
 
@@ -16,21 +28,33 @@ var ViewModel = function() {
       new Location("500 Startups", 19.425424, -99.162458),
       new Location("Nearsoft DF", 19.412991, -99.164425),
       new Location("WeWork Varsovia", 19.424371, -99.167971),
-      new Location("Facebook", 19.426087, -99.203319),
-      new Location("WeWork Varsovia", 19.423134, -99.1763432)
+      new Location("Facebook", 19.426087, -99.203319)
   ]);
 
   self.name = ko.observable();
 
+  /*Filter locations based on input*/
   self.filteredLocations = ko.computed(function() {
     if(self.name() === undefined || self.name() === "") {
+      locations = originalLocations;
+
+      // Load the map. Use try to prevent calling the function before defining it
+      try {
+        initMap();
+      }
+      catch(err) {
+        // Do nothing
+      }
       return self.locations();
     }
     else {
       var filtered = [];
+      locations = [];
       ko.utils.arrayForEach(this.locations(), function(location) {
-        if(location.name.indexOf(self.name()) >= 0) {
+        if(location.title.indexOf(self.name()) >= 0) {
           filtered.push(location);
+          locations.push(location);
+          initMap();
         }
       });
       return ko.observableArray(filtered);
@@ -41,7 +65,6 @@ var ViewModel = function() {
 };
 
 ko.applyBindings(new ViewModel());
-
 
 function initMap() {
   // Create a new map
@@ -60,38 +83,28 @@ function initMap() {
    map.setCenter(center); 
   });
 
-  var locations = [
-    {title: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
-    {title: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
-    {title: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
-    {title: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
-    {title: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}},
-    {title: 'Facebook', location: {lat: 19.426087, lng: -99.203319}},
-    {title: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
-  ];
-
   // Create every marker and add event listeners
   for(var i = 0; i < locations.length; i++) {
-      var position = locations[i].location;
-      var title = locations[i].title;
-      var marker = new google.maps.Marker({
-          map: map,
-          position: position,
-          title: title,
-          animation: google.maps.Animation.DROP,
-          id: i
-      })
-      markers.push(marker);
-      bounds.extend(marker.position);
+    var position = locations[i].location;
+    var title = locations[i].title;
+    var marker = new google.maps.Marker({
+        map: map,
+        position: position,
+        title: title,
+        animation: google.maps.Animation.DROP,
+        id: i
+    })
+    markers.push(marker);
+    bounds.extend(marker.position);
 
-      marker.addListener('click', function() {
-        populateInfoWindow(this, largeInfoWindow);
-      });
+    marker.addListener('click', function() {
+      populateInfoWindow(this, largeInfoWindow);
+    });
 
-      // Stop animation if infoWindow is closed
-      google.maps.event.addListener(largeInfoWindow,'closeclick',function(){
-        lastMarker.setAnimation(null);
-      });
+    // Stop animation if infoWindow is closed
+    google.maps.event.addListener(largeInfoWindow,'closeclick',function(){
+      lastMarker.setAnimation(null);
+    });
   }
 }
 
@@ -145,7 +158,7 @@ function populateInfoWindow(marker, infoWindow) {
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
       }
-    }, 2000)
+    }, 2000);
   }
 };
 
@@ -159,20 +172,16 @@ function getFoursquareInfo(title, lat, lng, callback) {
 
   // JSON request to FourSquare API
   $.getJSON(formattedFSLink).then(function(data){
-    for(var i = 0; i < data.response.venues.length; i++) {
-      console.log(data.response.venues[i].name);
-      if(data.response.venues[i].name == title) {
+    data.response.venues.forEach(function(venue, idx){
+      if(venue.name == title) {
         callback({
-          count: data.response.venues[i].stats.checkinsCount,
-          phone: data.response.venues[i].contact.phone,
-          twitter: data.response.venues[i].contact.twitter
+          count: venue.stats.checkinsCount,
+          phone: venue.contact.phone,
+          twitter: venue.contact.twitter
         });
-        i = data.response.venues.length;
       }
-    }
+    })
   }).fail(function() {
     callback(400);
   });
 };
-
-

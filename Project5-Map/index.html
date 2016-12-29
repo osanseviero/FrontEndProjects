@@ -1,41 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <style>
-      html,
-      body {
-        font-family: Arial, sans-serif;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        height: 80%;
-      }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
     <meta charset="UTF-8  ">
   </head>
   <body>
     <div id="map"></div>
-
-    <!--
-    <div id="select">
-      <select data-bind="options: locations, value: curLoc, optionsText: 'name', optionsCaption: 'All locations'"></select>
+    <div>
+      <p><input data-bind="value: name" placeholder="Location"/></p>
+      <div data-bind="foreach: filteredLocations()" id="listView">
+        <button data-bind="text: title" class="myButton"></button>
+      </div>
     </div>
-
-    <div id="list" data-bind="if: !curLoc()">
-       <ul data-bind="foreach: locations">
-        <li data-bind="text: name"></lu>
-      </ul>
-    </div>
-    <span data-bind="text: curLoc() ? curLoc().name : ''">-->
   
-    <p><input data-bind="value: name" placeholder="Location"/></p>
-    <ul data-bind="foreach: filteredLocations()">
-      <li data-bind="text: name"></lu>
-    </ul>
-
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.1.js"></script>
     <script src="js/app.js"></script>

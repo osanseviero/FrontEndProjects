@@ -18,6 +18,7 @@
   <body>
     <div id="map"></div>
 
+    <!--
     <div id="select">
       <select data-bind="options: locations, value: curLoc, optionsText: 'name', optionsCaption: 'All locations'"></select>
     </div>
@@ -27,8 +28,12 @@
         <li data-bind="text: name"></lu>
       </ul>
     </div>
-    <span data-bind="text: curLoc() ? curLoc().name : ''">
+    <span data-bind="text: curLoc() ? curLoc().name : ''">-->
   
+    <p><input data-bind="value: name" placeholder="Location"/></p>
+    <ul data-bind="foreach: filteredLocations()">
+      <li data-bind="text: name"></lu>
+    </ul>
 
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>

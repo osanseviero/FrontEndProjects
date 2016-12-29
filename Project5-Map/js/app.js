@@ -13,14 +13,31 @@ var ViewModel = function() {
   self.locations = ko.observableArray([
       new Location('Centraal', 19.412080, -99.180513),
       new Location("Google Mexico", 19.425414, -99.162448),
-      new Location("500 Startups", 19.425414, -99.162448),
+      new Location("500 Startups", 19.425424, -99.162458),
       new Location("Nearsoft DF", 19.412991, -99.164425),
       new Location("WeWork Varsovia", 19.424371, -99.167971),
       new Location("Facebook", 19.426087, -99.203319),
       new Location("WeWork Varsovia", 19.423134, -99.1763432)
   ]);
 
-  self.curLoc = ko.observable();
+  self.name = ko.observable();
+
+  self.filteredLocations = ko.computed(function() {
+    if(self.name() === undefined || self.name() === "") {
+      return self.locations();
+    }
+    else {
+      var filtered = [];
+      ko.utils.arrayForEach(this.locations(), function(location) {
+        if(location.name.indexOf(self.name()) >= 0) {
+          filtered.push(location);
+        }
+      });
+      return ko.observableArray(filtered);
+    }
+    
+  }, this);
+
 };
 
 ko.applyBindings(new ViewModel());
@@ -128,7 +145,7 @@ function populateInfoWindow(marker, infoWindow) {
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
       }
-    }, 1000)
+    }, 2000)
   }
 };
 
@@ -143,8 +160,8 @@ function getFoursquareInfo(title, lat, lng, callback) {
   // JSON request to FourSquare API
   $.getJSON(formattedFSLink).then(function(data){
     for(var i = 0; i < data.response.venues.length; i++) {
+      console.log(data.response.venues[i].name);
       if(data.response.venues[i].name == title) {
-        console.log(data.response.venues[i]);
         callback({
           count: data.response.venues[i].stats.checkinsCount,
           phone: data.response.venues[i].contact.phone,

@@ -77,7 +77,7 @@ function initMap() {
     zoom: 13,
   });
 
-  markers = []
+  markers = [];
 
   largeInfoWindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
@@ -98,9 +98,11 @@ function initMap() {
         name: name,
         animation: google.maps.Animation.DROP,
         id: i
-    })
+    });
+   
     markers.push(marker);
     bounds.extend(marker.position);
+    map.fitBounds(bounds)
 
     marker.addListener('click', function() {
       populateInfoWindow(this, largeInfoWindow);
@@ -163,7 +165,7 @@ function populateInfoWindow(marker, infoWindow) {
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
       }
-    }, 2000);
+    }, 500);
   }
 };
 

@@ -1,67 +1,71 @@
 var map;
 var lastMarker = null;
+var markers = [];
+var largeInfoWindow;
 
 var originalLocations = [
-  {title: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
-  {title: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
-  {title: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
-  {title: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
-  {title: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}},
-  {title: 'Facebook', location: {lat: 19.426087, lng: -99.203319}},
-  {title: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
+  {name: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
+  {name: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
+  {name: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
+  {name: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
+  {name: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}},
+  {name: 'Facebook', location: {lat: 19.426087, lng: -99.203319}},
+  {name: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
 ];
 
 var locations = originalLocations;
 
-function Location(title, lat, lng) {
+function Location(name, lat, lng) {
   var self = this;
-  self.title = title,
+  self.name = name,
   self.location = {lat, lng};
 }
 
 var ViewModel = function() {
   var self = this;
+  self.locations = ko.observableArray(originalLocations);
 
-  self.locations = ko.observableArray([
-      new Location('Centraal', 19.412080, -99.180513),
-      new Location("Google Mexico", 19.425414, -99.162448),
-      new Location("500 Startups", 19.425424, -99.162458),
-      new Location("Nearsoft DF", 19.412991, -99.164425),
-      new Location("WeWork Varsovia", 19.424371, -99.167971),
-      new Location("Facebook", 19.426087, -99.203319)
-  ]);
-
+  // Name for filter
   self.name = ko.observable();
+
+  activate = function(button) {
+    markers.forEach(function(marker, idx) {
+      if(marker.name == button.name) {
+        populateInfoWindow(marker, largeInfoWindow);
+      }
+    });
+  };
 
   /*Filter locations based on input*/
   self.filteredLocations = ko.computed(function() {
     if(self.name() === undefined || self.name() === "") {
       locations = originalLocations;
-
-      // Load the map. Use try to prevent calling the function before defining it
+      // Try to initiate the map (for first try)
       try {
         initMap();
       }
       catch(err) {
-        // Do nothing
+
       }
       return self.locations();
     }
+    // Filter the markers and buttons
     else {
       var filtered = [];
       locations = [];
+      var found = false;
       ko.utils.arrayForEach(this.locations(), function(location) {
-        if(location.title.indexOf(self.name()) >= 0) {
+        if(location.name.indexOf(self.name()) >= 0) {
           filtered.push(location);
           locations.push(location);
-          initMap();
+          found = true;  
         }
       });
+      initMap();
       return ko.observableArray(filtered);
     }
     
   }, this);
-
 };
 
 ko.applyBindings(new ViewModel());
@@ -73,8 +77,9 @@ function initMap() {
     zoom: 13,
   });
 
-  var markers = [];
-  var largeInfoWindow = new google.maps.InfoWindow();
+  markers = []
+
+  largeInfoWindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
 
   google.maps.event.addDomListener(window, "resize", function() {
@@ -86,11 +91,11 @@ function initMap() {
   // Create every marker and add event listeners
   for(var i = 0; i < locations.length; i++) {
     var position = locations[i].location;
-    var title = locations[i].title;
+    var name = locations[i].name;
     var marker = new google.maps.Marker({
         map: map,
         position: position,
-        title: title,
+        name: name,
         animation: google.maps.Animation.DROP,
         id: i
     })
@@ -120,8 +125,8 @@ function populateInfoWindow(marker, infoWindow) {
     lastMarker = marker;
 
     // Get the information and calls the callback.
-    getFoursquareInfo(marker.title, marker.position.lat, marker.position.lng, function(data) {
-      var content = '<h1>' + '<h1>' + marker.title + '</h1>';
+    getFoursquareInfo(marker.name, marker.position.lat, marker.position.lng, function(data) {
+      var content = '<h1>' + '<h1>' + marker.name + '</h1>';
       
       // Handle JSON request error
       if(data === 400) {
@@ -153,7 +158,7 @@ function populateInfoWindow(marker, infoWindow) {
     // Handle when there is no information
     setTimeout(function() {
       if(!recData) {
-        var content = '<h1>' + '<h1>' + marker.title + '</h1>';
+        var content = '<h1>' + '<h1>' + marker.name + '</h1>';
         content += '<div>No data available for this location</div>';
         infoWindow.setContent(content);
         infoWindow.open(map, marker);
@@ -164,7 +169,7 @@ function populateInfoWindow(marker, infoWindow) {
 
 
 /*Get twitter, phone, and count of a specific location*/
-function getFoursquareInfo(title, lat, lng, callback) {
+function getFoursquareInfo(name, lat, lng, callback) {
   var foursquareLink = 'https://api.foursquare.com/v2/venues/search?ll=%lat%,%lon%&client_id=FFNGZD4W0OKDN31OFQPYYHVUYL3KJJOZJ1OHV4LDBO0VW2OX&client_secret=ZQAKAY5RWOHWTFP0PM1LO5GNY00RIZMOCQAJOIHPO3YA1NPF&v=20120609';
 
   var formattedFSLink = foursquareLink.replace('%lat%', lat);
@@ -173,7 +178,7 @@ function getFoursquareInfo(title, lat, lng, callback) {
   // JSON request to FourSquare API
   $.getJSON(formattedFSLink).then(function(data){
     data.response.venues.forEach(function(venue, idx){
-      if(venue.name == title) {
+      if(venue.name == name) {
         callback({
           count: venue.stats.checkinsCount,
           phone: venue.contact.phone,
@@ -185,3 +190,5 @@ function getFoursquareInfo(title, lat, lng, callback) {
     callback(400);
   });
 };
+
+

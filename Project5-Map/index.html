@@ -7,9 +7,9 @@
   <body>
     <div id="map"></div>
     <div>
-      <p><input data-bind="value: name" placeholder="Location"/></p>
+      <p><input data-bind="value: name" placeholder="Enter a location"/></p>
       <div data-bind="foreach: filteredLocations()" id="listView">
-        <button data-bind="text: title" class="myButton"></button>
+        <button data-bind="click: activate, text: name" class="myButton"></button>
       </div>
     </div>
   

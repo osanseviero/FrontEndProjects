@@ -1,6 +1,7 @@
 var map;
 var lastMarker = null;
 var largeInfoWindow;
+var currentOpen = '';
 
 var locations = [
   {name: 'Centraal', location: {lat: 19.412080, lng: -99.180513}, marker: null},
@@ -23,6 +24,7 @@ var ViewModel = function() {
     locations.forEach(function(location, idx) {
       if(location.marker.name == button.name) {
         populateInfoWindow(location.marker, largeInfoWindow);
+        currentOpen = location.marker.name;
       }
     });
   };
@@ -30,7 +32,6 @@ var ViewModel = function() {
   /*Filter locations based on input*/
   self.filteredLocations = ko.computed(function() {
     if(self.name() === undefined || self.name() === "") {
-
       // Try to initiate the map (for initiation)
       try {
         locations.forEach(function(location, idx) {
@@ -45,16 +46,19 @@ var ViewModel = function() {
     // Filter the markers and buttons
     else {
       var filtered = [];
-      var found = false;
       ko.utils.arrayForEach(this.locations(), function(location) {
         if(location.name.indexOf(self.name()) >= 0) {
           filtered.push(location);
           location.marker.setVisible(true);
-          found = true;  
-          console.log("found");
+      
+            populateInfoWindow(location.marker, largeInfoWindow)
+          
         }
         else {
           location.marker.setVisible(false);
+          if(currentOpen === location.name) {
+            largeInfoWindow.close();
+          }
         }
       });
       return ko.observableArray(filtered);
@@ -99,6 +103,7 @@ function initMap() {
     map.fitBounds(bounds)
 
     marker.addListener('click', function() {
+      currentOpen = marker.name;
       populateInfoWindow(this, largeInfoWindow);
     });
 
@@ -108,7 +113,6 @@ function initMap() {
     });
 
     locations[i].marker = marker;
-
   }
 }
 
@@ -117,7 +121,6 @@ function populateInfoWindow(marker, infoWindow) {
   if(infoWindow.marker != marker) {
     marker.setAnimation(google.maps.Animation.BOUNCE)
     infoWindow.marker = marker;
-    var recData = false;
 
     // Stop the animation of the previous marker
     if(lastMarker !== null) lastMarker.setAnimation(null);
@@ -130,6 +133,10 @@ function populateInfoWindow(marker, infoWindow) {
       // Handle JSON request error
       if(data === 400) {
         content += "<p>There was an error retrieving information from FourSquare API</p>";
+      }
+      // Handle no information error
+      else if(data === 300) {
+        content += '<h2>No information found</h2>';
       }
 
       // Fill the information window with the information that exists for specific record
@@ -146,23 +153,11 @@ function populateInfoWindow(marker, infoWindow) {
       }
 
       infoWindow.setContent(content);
-      infoWindow.open(map, marker);
-      recData = true;
     });
 
     // Handle when the website waits for the information
     infoWindow.open(map, marker);
     infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
-
-    // Handle when there is no information
-    setTimeout(function() {
-      if(!recData) {
-        var content = '<h1>' + '<h1>' + marker.name + '</h1>';
-        content += '<div>No data available for this location</div>';
-        infoWindow.setContent(content);
-        infoWindow.open(map, marker);
-      }
-    }, 500);
   }
 };
 
@@ -174,6 +169,7 @@ function getFoursquareInfo(name, lat, lng, callback) {
   formattedFSLink = formattedFSLink.replace('%lon%', lng);
 
   // JSON request to FourSquare API
+  var found = false;
   $.getJSON(formattedFSLink).then(function(data){
     data.response.venues.forEach(function(venue, idx){
       if(venue.name == name) {
@@ -182,6 +178,10 @@ function getFoursquareInfo(name, lat, lng, callback) {
           phone: venue.contact.phone,
           twitter: venue.contact.twitter
         });
+        found = true;
+      }
+      if(idx+1 == data.response.venues.length && !found) {
+        callback(300);
       }
     })
   }).fail(function() {

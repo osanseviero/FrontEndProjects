@@ -1,37 +1,28 @@
 var map;
 var lastMarker = null;
-var markers = [];
 var largeInfoWindow;
 
-var originalLocations = [
-  {name: 'Centraal', location: {lat: 19.412080, lng: -99.180513}},
-  {name: 'Google México', location: {lat: 19.428222, lng: -99.206510}},
-  {name: '500 Startups', location: {lat: 19.425414, lng: -99.162448}},
-  {name: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}},
-  {name: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}},
-  {name: 'Facebook', location: {lat: 19.426087, lng: -99.203319}},
-  {name: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}}
+var locations = [
+  {name: 'Centraal', location: {lat: 19.412080, lng: -99.180513}, marker: null},
+  {name: 'Google México', location: {lat: 19.428222, lng: -99.206510}, marker: null},
+  {name: '500 Startups', location: {lat: 19.425414, lng: -99.162448}, marker: null},
+  {name: 'Nearsoft DF', location: {lat: 19.412991, lng: -99.164425}, marker: null},
+  {name: 'WeWork Varsovia', location: {lat: 19.424371, lng: -99.167971}, marker: null},
+  {name: 'Facebook', location: {lat: 19.426087, lng: -99.203319}, marker: null},
+  {name: 'Centro de Cultura Digital', location: {lat: 19.423134, lng: -99.1763432}, marker: null}
 ];
-
-var locations = originalLocations;
-
-function Location(name, lat, lng) {
-  var self = this;
-  self.name = name,
-  self.location = {lat, lng};
-}
 
 var ViewModel = function() {
   var self = this;
-  self.locations = ko.observableArray(originalLocations);
+  self.locations = ko.observableArray(locations);
 
   // Name for filter
   self.name = ko.observable();
 
   activate = function(button) {
-    markers.forEach(function(marker, idx) {
-      if(marker.name == button.name) {
-        populateInfoWindow(marker, largeInfoWindow);
+    locations.forEach(function(location, idx) {
+      if(location.marker.name == button.name) {
+        populateInfoWindow(location.marker, largeInfoWindow);
       }
     });
   };
@@ -39,10 +30,12 @@ var ViewModel = function() {
   /*Filter locations based on input*/
   self.filteredLocations = ko.computed(function() {
     if(self.name() === undefined || self.name() === "") {
-      locations = originalLocations;
+
       // Try to initiate the map (for initiation)
       try {
-        initMap();
+        locations.forEach(function(location, idx) {
+          location.marker.setVisible(true);
+        })
       }
       catch(err) {
         // Do nothing
@@ -52,16 +45,18 @@ var ViewModel = function() {
     // Filter the markers and buttons
     else {
       var filtered = [];
-      locations = [];
       var found = false;
       ko.utils.arrayForEach(this.locations(), function(location) {
         if(location.name.indexOf(self.name()) >= 0) {
           filtered.push(location);
-          locations.push(location);
+          location.marker.setVisible(true);
           found = true;  
+          console.log("found");
+        }
+        else {
+          location.marker.setVisible(false);
         }
       });
-      initMap();
       return ko.observableArray(filtered);
     }
     
@@ -100,7 +95,6 @@ function initMap() {
         id: i
     });
    
-    markers.push(marker);
     bounds.extend(marker.position);
     map.fitBounds(bounds)
 
@@ -112,6 +106,9 @@ function initMap() {
     google.maps.event.addListener(largeInfoWindow,'closeclick',function(){
       lastMarker.setAnimation(null);
     });
+
+    locations[i].marker = marker;
+
   }
 }
 

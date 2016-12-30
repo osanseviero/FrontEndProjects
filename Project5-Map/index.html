@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width">
   </head>
   <body>
+
     <div id="map"></div>
-    <div>
+    <section>
       <p><input data-bind="value: name" placeholder="Enter a location"/></p>
       <div data-bind="foreach: filteredLocations()" id="listView">
         <button data-bind="click: activate, text: name" class="myButton"></button>
       </div>
-    </div>
+    </section>
   
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="js/lib/knockout-3.4.1.js"></script>

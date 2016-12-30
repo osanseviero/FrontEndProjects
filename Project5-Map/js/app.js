@@ -20,11 +20,11 @@ var ViewModel = function() {
   // Name for filter
   self.name = ko.observable();
 
+  /*Activate the marker when a button in the list is clicked*/
   activate = function(button) {
     locations.forEach(function(location, idx) {
       if(location.marker.name == button.name) {
         populateInfoWindow(location.marker, largeInfoWindow);
-        currentOpen = location.marker.name;
       }
     });
   };
@@ -50,13 +50,12 @@ var ViewModel = function() {
         if(location.name.indexOf(self.name()) >= 0) {
           filtered.push(location);
           location.marker.setVisible(true);
-      
-            populateInfoWindow(location.marker, largeInfoWindow)
-          
         }
         else {
           location.marker.setVisible(false);
+          console.log(currentOpen + " and " + location.name);
           if(currentOpen === location.name) {
+            console.log("closing");
             largeInfoWindow.close();
           }
         }
@@ -103,7 +102,6 @@ function initMap() {
     map.fitBounds(bounds)
 
     marker.addListener('click', function() {
-      currentOpen = marker.name;
       populateInfoWindow(this, largeInfoWindow);
     });
 
@@ -118,47 +116,47 @@ function initMap() {
 
 /* Fill the information window with information from FourSquare API*/
 function populateInfoWindow(marker, infoWindow) {
-  if(infoWindow.marker != marker) {
-    marker.setAnimation(google.maps.Animation.BOUNCE)
-    infoWindow.marker = marker;
+  marker.setAnimation(google.maps.Animation.BOUNCE)
+  infoWindow.marker = marker;
+  currentOpen = marker.name;
 
-    // Stop the animation of the previous marker
-    if(lastMarker !== null) lastMarker.setAnimation(null);
-    lastMarker = marker;
+  // Stop the animation of the previous marker
+  if(lastMarker !== null) lastMarker.setAnimation(null);
+  lastMarker = marker;
 
-    // Get the information and calls the callback.
-    getFoursquareInfo(marker.name, marker.position.lat, marker.position.lng, function(data) {
-      var content = '<h1>' + '<h1>' + marker.name + '</h1>';
-      
-      // Handle JSON request error
-      if(data === 400) {
-        content += "<p>There was an error retrieving information from FourSquare API</p>";
+  // Get the information and calls the callback.
+  getFoursquareInfo(marker.name, marker.position.lat, marker.position.lng, function(data) {
+    var content = '<h1>' + '<h1>' + marker.name + '</h1>';
+    
+    // Handle JSON request error
+    if(data.status === 400) {
+      content += "<p>There was an error retrieving information from FourSquare API</p>";
+    }
+    // Handle no information error
+    else if(data.status === 300) {
+      content += '<h2>No information found</h2>';
+    }
+
+    // Fill the information window with the information that exists for specific record
+    else {
+      if(data.twitter) {
+        content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
       }
-      // Handle no information error
-      else if(data === 300) {
-        content += '<h2>No information found</h2>';
+      if(data.count) {
+        content += "<p>Visit Count " + data.count + "</p>";
       }
-
-      // Fill the information window with the information that exists for specific record
-      else {
-        if(data.twitter) {
-          content += '<a href="https://twitter.com/' + data.twitter + '">Twitter</a>';
-        }
-        if(data.count) {
-          content += "<p>Visit Count " + data.count + "</p>";
-        }
-        if(data.phone) {
-          content += '<p>Phone: ' + data.phone + '</p>';
-        }
+      if(data.phone) {
+        content += '<p>Phone: ' + data.phone + '</p>';
       }
+    }
 
-      infoWindow.setContent(content);
-    });
+    infoWindow.setContent(content);
+  });
 
-    // Handle when the website waits for the information
-    infoWindow.open(map, marker);
-    infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
-  }
+  // Handle when the website waits for the information
+  infoWindow.open(map, marker);
+  infoWindow.setContent('<h2> Retrieving information from FourSquare </h2>');
+  
 };
 
 /*Get twitter, phone, and count of a specific location*/
@@ -174,19 +172,19 @@ function getFoursquareInfo(name, lat, lng, callback) {
     data.response.venues.forEach(function(venue, idx){
       if(venue.name == name) {
         callback({
+          name: name,
           count: venue.stats.checkinsCount,
           phone: venue.contact.phone,
-          twitter: venue.contact.twitter
+          twitter: venue.contact.twitter,
+          status: 200
         });
         found = true;
       }
       if(idx+1 == data.response.venues.length && !found) {
-        callback(300);
+        callback({name: name, status: 300});
       }
     })
   }).fail(function() {
-    callback(400);
+    callback({status: 400});
   });
 };
-
-

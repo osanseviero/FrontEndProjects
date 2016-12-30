@@ -188,3 +188,14 @@ function getFoursquareInfo(name, lat, lng, callback) {
     callback({status: 400});
   });
 };
+
+/*Handle when there is an error loading the Google Maps API*/
+function googleError() {
+  alert("Error loading the Google Maps API");
+};
+
+
+
+
+
+

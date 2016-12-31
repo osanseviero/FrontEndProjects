@@ -70,10 +70,8 @@ $(function() {
         });
 
         /* Test that ensures there is a .entry element in the .feed container after loading*/
-        it('contains at least one element when loaded', function(done) {
-            var feed = $('.feed');
-            expect(feed.find('.entry').length).not.toBe(0);
-            done();
+        it('contains at least one element when loaded', function() {
+            expect(('.feed .entry').length).not.toBe(0);
         });       
     });
 
@@ -86,18 +84,18 @@ $(function() {
             // Loads first feed
             loadFeed(0, function() {
                 prevContent = $('.feed').html();
+                // Loads a new feed
+                loadFeed(1, function() {
+                    curContent = $('.feed').html();
+                    done();
+                });
             });
-            // Loads a new feed
-            loadFeed(1, function() {
-                curContent = $('.feed').html();
-                done();
-            })
+            
         });
 
         /* Test that ensures that the content has changed */
-        it('changes the content', function(done) {
+        it('changes the content', function() {
             expect(prevContent).not.toEqual(curContent);
-            done();
         });
     });
 }());
